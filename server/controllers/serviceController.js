@@ -1,6 +1,5 @@
 const Service = require('../models/Service');
 
-// 1. OBTENER TODOS (READ)
 exports.getAllServices = async (req, res) => {
     try {
         const services = await Service.findAll();
@@ -10,7 +9,6 @@ exports.getAllServices = async (req, res) => {
     }
 };
 
-// 2. CREAR NUEVO (CREATE) - Con validación de UNIQUE
 exports.createService = async (req, res) => {
     try {
         const { name, description, price } = req.body;
@@ -24,7 +22,6 @@ exports.createService = async (req, res) => {
     }
 };
 
-// 3. ACTUALIZAR (UPDATE)
 exports.updateService = async (req, res) => {
     try {
         const { id } = req.params;
@@ -39,7 +36,6 @@ exports.updateService = async (req, res) => {
     }
 };
 
-// 4. ELIMINAR (DELETE)
 exports.deleteService = async (req, res) => {
     try {
         const { id } = req.params;
