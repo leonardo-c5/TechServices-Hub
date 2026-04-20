@@ -21,7 +21,8 @@ const Service = sequelize.define('Service', {
         allowNull: false
     }
 }, {
-    timestamps: true 
+    timestamps: true,
+    paranoid: true // <--- ESTO ACTIVA EL SOFT DELETE (Fase Pro)
 });
 
 module.exports = Service;
