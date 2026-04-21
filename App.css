@@ -1,0 +1,200 @@
+/* client/src/App.css */
+:root {
+  --sidebar-bg: #1a2226;
+  --sidebar-hover: #222d32;
+  --primary-blue: #0071b6;
+  --accent-blue: #008ece;
+  --main-bg: #f4f7f9; /* Color de fondo tipo Dashboard */
+  --white: #ffffff;
+  --text-dark: #2c3e50;
+  --text-muted: #7f8c8d;
+  --border: #dcdde1;
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+body { margin: 0; font-family: 'Inter', 'Segoe UI', sans-serif; background-color: var(--main-bg); color: var(--text-dark); }
+
+.dashboard-container { display: flex; min-height: 100vh; }
+
+/* SIDEBAR - LIMPIO Y PROFESIONAL */
+.sidebar {
+  width: 240px;
+  background-color: var(--sidebar-bg);
+  color: #b8c7ce;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-header {
+  padding: 25px;
+  background: #161c20;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #222d32;
+}
+
+.sidebar-menu { list-style: none; padding: 0; margin: 0; }
+
+.menu-item {
+  padding: 18px 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  color: #b8c7ce;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.menu-item.active {
+  background: var(--sidebar-hover);
+  color: white;
+  border-left: 4px solid var(--primary-blue);
+}
+
+/* TOP BAR - BARRA DE BÚSQUEDA GRANDE */
+.main-content { flex-grow: 1; display: flex; flex-direction: column; }
+
+.top-bar {
+  background: var(--white);
+  height: 90px; /* Un poco más de aire */
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.search-wrapper { width: 100%; max-width: 900px; }
+
+.search-input-group { position: relative; width: 100%; }
+
+.search-input-group input {
+  width: 100%;
+  padding: 16px 20px 16px 60px;
+  font-size: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background-color: #fcfdfe;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-input-group input:focus {
+  border-color: var(--primary-blue);
+  background-color: white;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+}
+
+/* CONTENT BODY */
+.content-body { padding: 40px; }
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 35px;
+}
+
+.section-title { font-size: 1.7rem; font-weight: 700; color: var(--text-dark); margin: 0; }
+
+.stats-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+}
+
+/* SERVICE CARD - ZOHO STYLE */
+.service-card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary-blue);
+}
+
+.card-top { padding: 30px; flex-grow: 1; }
+
+.card-top h3 { 
+  margin: 0 0 10px 0; 
+  font-size: 1.3rem; 
+  color: var(--primary-blue); 
+  font-weight: 700;
+}
+
+.card-top p { 
+  color: var(--text-muted); 
+  font-size: 0.95rem; 
+  line-height: 1.6; 
+  margin-bottom: 20px;
+}
+
+.price-tag {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.price-currency { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+
+.card-footer {
+  display: flex;
+  background: #fcfdfe;
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 12px 12px;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 15px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.btn-edit:hover { background: #f0f9ff; color: var(--primary-blue); }
+.btn-delete:hover { background: #fff1f2; color: #e11d48; }
+
+.loader { text-align: center; padding: 50px; color: var(--primary-blue); font-weight: 500; }
