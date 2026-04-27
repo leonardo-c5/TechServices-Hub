@@ -36,8 +36,15 @@ function App() {
   const handleSubmit = async (e) => {
   e.preventDefault()
   try {
-    // CAMBIO: Usamos la variable de entorno
-    await axios.post(`${import.meta.env.VITE_API_URL}/services`, form)
+    // CAMBIO AQUÍ: Enviamos 'name' y 'description' en lugar de 'nombre' y 'descripcion'
+    const datosParaEnviar = {
+      name: form.nombre,
+      description: form.descripcion,
+      price: form.precio
+    }
+    
+    await axios.post(`${import.meta.env.VITE_API_URL}/services`, datosParaEnviar)
+    
     setForm({ nombre: '', descripcion: '', precio: '' })
     cargarServicios()
     setError('')

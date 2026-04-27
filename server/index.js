@@ -30,7 +30,7 @@ const PORT = process.env.PORT || 3000;
 // SINCRONIZACIÓN CON LA NUBE (Aiven)
 // 'alter: true' ayuda a que si agregaste columnas nuevas (como categoriaId), 
 // Sequelize intente crearlas sin borrar tus datos.
-sequelize.sync({ force: true }) 
+sequelize.sync({ alert: true }) 
     .then(() => {
         console.log('¡TABLAS CREADAS EN AIVEN!');
         app.listen(PORT, () => console.log(`Puerto: ${PORT}`));
