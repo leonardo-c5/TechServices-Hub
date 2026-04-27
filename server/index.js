@@ -5,7 +5,7 @@ const sequelize = require('./config/db');
 
 // Importar Modelos para establecer relaciones
 const Service = require('./models/Service');
-const Categoria = require('./models/categoria');
+const Categoria = require('./models/Categoria');
 
 // Importar Rutas
 const serviceRoutes = require('./routes/serviceRoutes');
@@ -30,10 +30,10 @@ const PORT = process.env.PORT || 3000;
 // SINCRONIZACIÓN CON LA NUBE (Aiven)
 // 'alter: true' ayuda a que si agregaste columnas nuevas (como categoriaId), 
 // Sequelize intente crearlas sin borrar tus datos.
-sequelize.sync({ alter: true })
+sequelize.sync({ force: true }) 
     .then(() => {
-        console.log('Conexión a Aiven exitosa y tablas actualizadas.');
-        app.listen(PORT, () => console.log(`Servidor corriendo en puerto ${PORT}`));
+        console.log('¡TABLAS CREADAS EN AIVEN!');
+        app.listen(PORT, () => console.log(`Puerto: ${PORT}`));
     })
     .catch(err => {
         console.error('Error al conectar con la DB en la nube:', err);
