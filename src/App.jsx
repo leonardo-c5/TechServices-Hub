@@ -12,14 +12,15 @@ function App() {
   })
 
   const cargarServicios = async () => {
-    try {
-      const res = await axios.get('http://localhost:3000/api/servicios')
-      setServicios(res.data)
-      setError('')
-    } catch (err) {
-      setError('No se pudo conectar con el backend')
-    }
+  try {
+    // CAMBIO: Usamos import.meta.env.VITE_API_URL
+    const res = await axios.get(`${import.meta.env.VITE_API_URL}/services`)
+    setServicios(res.data)
+    setError('')
+  } catch (err) {
+    setError('No se pudo conectar con el backend')
   }
+}
 
   useEffect(() => {
     cargarServicios()
@@ -33,34 +34,27 @@ function App() {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    try {
-      await axios.post('http://localhost:3000/api/servicios', form)
-      setForm({
-        nombre: '',
-        descripcion: '',
-        precio: ''
-      })
-      cargarServicios()
-      setError('')
-    } catch (err) {
-      if (err.response) {
-        setError(err.response.data.message)
-      } else {
-        setError('Error al conectar con el servidor')
-      }
-    }
+  e.preventDefault()
+  try {
+    // CAMBIO: Usamos la variable de entorno
+    await axios.post(`${import.meta.env.VITE_API_URL}/services`, form)
+    setForm({ nombre: '', descripcion: '', precio: '' })
+    cargarServicios()
+    setError('')
+  } catch (err) {
+    setError('Error al conectar con el servidor')
   }
+}
 
   const eliminar = async (id) => {
-    try {
-      await axios.delete(`http://localhost:3000/api/servicios/${id}`)
-      cargarServicios()
-    } catch (err) {
-      setError('No se pudo eliminar el servicio')
-    }
+  try {
+    // CAMBIO: Usamos la variable de entorno
+    await axios.delete(`${import.meta.env.VITE_API_URL}/services/${id}`)
+    cargarServicios()
+  } catch (err) {
+    setError('No se pudo eliminar el servicio')
   }
+}
 
   const filtrados = servicios.filter((s) =>
     s.nombre.toLowerCase().includes(busqueda.toLowerCase())
