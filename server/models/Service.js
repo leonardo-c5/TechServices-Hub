@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
+const Categoria = require('./Categoria');
 
 const Service = sequelize.define('Service', {
     id: {
@@ -19,10 +20,21 @@ const Service = sequelize.define('Service', {
     price: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
+    },
+    categoriaId: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: Categoria,
+            key: 'id'
+        }
     }
 }, {
     timestamps: true,
-    paranoid: true // <--- ESTO ACTIVA EL SOFT DELETE (Fase Pro)
+    paranoid: true // Requerimiento: Soft Delete
 });
+
+// DEFINIR RELACIONES AQUÍ ANTES DEL MODULE.EXPORTS
+Categoria.hasMany(Service, { foreignKey: 'categoriaId', as: 'servicios' });
+Service.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
 
 module.exports = Service;
