@@ -80,9 +80,11 @@ function App() {
     }
   };
 
-  const filteredServices = services.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredServices = services.filter(s => {
+  // Si s.name no existe, intenta con s.nombre, y si no, usa un texto vacío
+  const nombreSeguro = s.name || s.nombre || ""; 
+  return nombreSeguro.toLowerCase().includes(searchTerm.toLowerCase());
+});
 
   return (
     <div className="dashboard-container">
