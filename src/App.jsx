@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Wrench, LayoutDashboard, Search, PlusCircle, Save, X } from 'lucide-react';
 import ServiceCard from './components/ServiceCard';
 import './App.css';
 
-// Usamos la variable de entorno de Vercel
 const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
@@ -12,14 +10,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
-
-  // Estados para manejar el formulario
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: ''
-  });
+  const [formData, setFormData] = useState({ name: '', description: '', price: '' });
 
   useEffect(() => {
     fetchServices();
@@ -40,10 +32,7 @@ function App() {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -93,7 +82,6 @@ function App() {
   };
 
   const filteredServices = services.filter(s => {
-    // Escudo protector contra datos viejos
     const nombreSeguro = s.name || s.nombre || "";
     return nombreSeguro.toLowerCase().includes(searchTerm.toLowerCase());
   });
@@ -102,14 +90,14 @@ function App() {
     <div className="dashboard-container">
       <aside className="sidebar">
         <div className="sidebar-header">
-          <Wrench size={24} /> <span>TechHub</span>
+          🔧 <span>TechHub</span>
         </div>
         <ul className="sidebar-menu">
           <li className="menu-item active">
-            <LayoutDashboard size={20} /> <span>Dashboard</span>
+            📊 <span>Dashboard</span>
           </li>
           <li className="menu-item" onClick={() => setShowForm(!showForm)} style={{ cursor: 'pointer', background: showForm ? 'rgba(255,255,255,0.1)' : 'transparent' }}>
-            <PlusCircle size={20} /> <span>{showForm ? 'Cancelar Registro' : 'Nuevo Servicio'}</span>
+            ➕ <span>{showForm ? 'Cancelar Registro' : 'Nuevo Servicio'}</span>
           </li>
         </ul>
       </aside>
@@ -118,7 +106,7 @@ function App() {
         <header className="top-bar">
           <div className="search-wrapper">
             <div className="search-input-group">
-              <Search className="search-icon-inside" size={22} />
+              <span className="search-icon-inside" style={{fontSize: '18px', left: '16px', top: '10px'}}>🔍</span>
               <input
                 type="text"
                 placeholder="Busca servicios por nombre..."
@@ -145,8 +133,8 @@ function App() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <h3 style={{ margin: 0, color: '#1e293b', fontSize: '18px' }}>Registrar Nuevo Servicio</h3>
-                <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-                  <X size={20} />
+                <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                  ❌
                 </button>
               </div>
               
@@ -164,14 +152,14 @@ function App() {
                   <input type="number" name="price" value={formData.price} onChange={handleInputChange} required placeholder="Ej. 50" style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />
                 </div>
                 <button type="submit" style={{ height: '42px', padding: '0 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600' }}>
-                  <Save size={18} /> Guardar
+                  💾 Guardar
                 </button>
               </form>
             </div>
           )}
 
           {loading ? (
-            <div className="loader">Sincronizando base de datos en Aiven...</div>
+            <div className="loader">Sincronizando base de datos...</div>
           ) : (
             <div className="services-grid">
               {filteredServices.map(service => (

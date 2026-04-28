@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^0.372.0",
     "axios": "^1.15.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
