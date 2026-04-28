@@ -1,466 +1,198 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Wrench, LayoutDashboard, Search, PlusCircle, Save, X } from 'lucide-react';
+import ServiceCard from './components/ServiceCard';
+import './App.css';
+
+// Usamos la variable de entorno de Vercel
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
-  const [servicios, setServicios] = useState([])
-  const [busqueda, setBusqueda] = useState('')
-  const [error, setError] = useState('')
-  const [form, setForm] = useState({
-    nombre: '',
-    descripcion: '',
-    precio: ''
-  })
+  const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState(null);
 
-  const cargarServicios = async () => {
-  try {
-    // CAMBIO: Usamos import.meta.env.VITE_API_URL
-    const res = await axios.get(`${import.meta.env.VITE_API_URL}/services`)
-    setServicios(res.data)
-    setError('')
-  } catch (err) {
-    setError('No se pudo conectar con el backend')
-  }
-}
+  // Estados para manejar el formulario
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    price: ''
+  });
 
   useEffect(() => {
-    cargarServicios()
-  }, [])
+    fetchServices();
+  }, []);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API_URL}/services`);
+      setServices(res.data);
+      setError(null);
+    } catch (err) {
+      console.error("Error backend:", err);
+      setError("No se pudo sincronizar con el servidor");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
       [e.target.name]: e.target.value
-    })
-  }
+    });
+  };
 
   const handleSubmit = async (e) => {
-  e.preventDefault()
-  try {
-    // CAMBIO AQUÍ: Enviamos 'name' y 'description' en lugar de 'nombre' y 'descripcion'
-    const datosParaEnviar = {
-      name: form.nombre,
-      description: form.descripcion,
-      price: form.precio
+    e.preventDefault();
+    try {
+      await axios.post(`${API_URL}/services`, {
+        name: formData.name,
+        description: formData.description,
+        price: parseFloat(formData.price)
+      });
+      
+      setFormData({ name: '', description: '', price: '' });
+      setShowForm(false);
+      fetchServices();
+      alert("¡Servicio guardado con éxito en la nube!");
+    } catch (err) {
+      alert("Error al guardar el servicio");
     }
-    
-    await axios.post(`${import.meta.env.VITE_API_URL}/services`, datosParaEnviar)
-    
-    setForm({ nombre: '', descripcion: '', precio: '' })
-    cargarServicios()
-    setError('')
-  } catch (err) {
-    setError('Error al conectar con el servidor')
-  }
-}
+  };
 
-  const eliminar = async (id) => {
-  try {
-    // CAMBIO: Usamos la variable de entorno
-    await axios.delete(`${import.meta.env.VITE_API_URL}/services/${id}`)
-    cargarServicios()
-  } catch (err) {
-    setError('No se pudo eliminar el servicio')
-  }
-}
+  const deleteService = async (id) => {
+    if (window.confirm("¿Eliminar este servicio permanentemente?")) {
+      try {
+        await axios.delete(`${API_URL}/services/${id}`);
+        fetchServices();
+      } catch (err) {
+        alert("Error al eliminar");
+      }
+    }
+  };
 
-  const filtrados = servicios.filter((s) =>
-    s.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  )
+  const editService = async (service) => {
+    const newName = window.prompt("Editar nombre:", service.name || service.nombre);
+    const newPrice = window.prompt("Editar precio:", service.price || service.precio);
+    if (newName && newPrice) {
+      try {
+        await axios.put(`${API_URL}/services/${service.id}`, {
+          name: newName,
+          price: parseFloat(newPrice),
+          description: service.description || service.descripcion
+        });
+        fetchServices();
+      } catch (err) {
+        alert("Error al actualizar");
+      }
+    }
+  };
+
+  const filteredServices = services.filter(s => {
+    // Escudo protector contra datos viejos
+    const nombreSeguro = s.name || s.nombre || "";
+    return nombreSeguro.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 45%, #38bdf8 100%)',
-        padding: '40px 20px',
-        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif"
-      }}
-    >
-      <div
-        style={{
-          maxWidth: '1200px',
-          margin: '0 auto'
-        }}
-      >
-        <div
-          style={{
-            textAlign: 'center',
-            color: 'white',
-            marginBottom: '35px'
-          }}
-        >
-          <h1
-            style={{
-              fontSize: '56px',
-              margin: '0',
-              fontWeight: '800',
-              letterSpacing: '1px',
-              textShadow: '0 4px 18px rgba(0,0,0,0.25)'
-            }}
-          >
-            TechServices Hub
-          </h1>
-
-          <p
-            style={{
-              marginTop: '14px',
-              fontSize: '18px',
-              color: '#dbeafe',
-              maxWidth: '760px',
-              marginInline: 'auto',
-              lineHeight: '1.7'
-            }}
-          >
-            Plataforma de gestión de servicios tecnológicos. Administra soluciones como
-            desarrollo web, soporte técnico, diseño UI/UX, ciberseguridad y más.
-          </p>
+    <div className="dashboard-container">
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <Wrench size={24} /> <span>TechHub</span>
         </div>
+        <ul className="sidebar-menu">
+          <li className="menu-item active">
+            <LayoutDashboard size={20} /> <span>Dashboard</span>
+          </li>
+          <li className="menu-item" onClick={() => setShowForm(!showForm)} style={{ cursor: 'pointer', background: showForm ? 'rgba(255,255,255,0.1)' : 'transparent' }}>
+            <PlusCircle size={20} /> <span>{showForm ? 'Cancelar Registro' : 'Nuevo Servicio'}</span>
+          </li>
+        </ul>
+      </aside>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1.1fr 0.9fr',
-            gap: '28px',
-            alignItems: 'start'
-          }}
-        >
-          <div
-            style={{
-              background: 'rgba(255,255,255,0.14)',
-              backdropFilter: 'blur(14px)',
-              WebkitBackdropFilter: 'blur(14px)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              borderRadius: '24px',
-              padding: '30px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.25)'
-            }}
-          >
-            <h2
-              style={{
-                color: 'white',
-                marginTop: 0,
-                marginBottom: '10px',
-                fontSize: '28px'
-              }}
-            >
-              Registrar servicio
-            </h2>
+      <main className="main-content">
+        <header className="top-bar">
+          <div className="search-wrapper">
+            <div className="search-input-group">
+              <Search className="search-icon-inside" size={22} />
+              <input
+                type="text"
+                placeholder="Busca servicios por nombre..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+        </header>
 
-            <p
-              style={{
-                color: '#dbeafe',
-                marginTop: 0,
-                marginBottom: '25px',
-                lineHeight: '1.6'
-              }}
-            >
-              Agrega un nuevo servicio al catálogo de la empresa con su nombre,
-              descripción y precio referencial.
-            </p>
+        <div className="content-body">
+          {error && <div className="error-banner">{error}</div>}
 
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '18px' }}>
-                <label
-                  style={{
-                    display: 'block',
-                    color: '#e0f2fe',
-                    marginBottom: '8px',
-                    fontWeight: '600'
-                  }}
-                >
-                  Nombre del servicio
-                </label>
-                <input
-                  name="nombre"
-                  placeholder="Ej. Desarrollo Web"
-                  onChange={handleChange}
-                  value={form.nombre}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '14px 16px',
-                    borderRadius: '14px',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    outline: 'none',
-                    fontSize: '15px',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '18px' }}>
-                <label
-                  style={{
-                    display: 'block',
-                    color: '#e0f2fe',
-                    marginBottom: '8px',
-                    fontWeight: '600'
-                  }}
-                >
-                  Descripción
-                </label>
-                <input
-                  name="descripcion"
-                  placeholder="Ej. Creación de sitios modernos y responsivos"
-                  onChange={handleChange}
-                  value={form.descripcion}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '14px 16px',
-                    borderRadius: '14px',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    outline: 'none',
-                    fontSize: '15px',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <div style={{ marginBottom: '24px' }}>
-                <label
-                  style={{
-                    display: 'block',
-                    color: '#e0f2fe',
-                    marginBottom: '8px',
-                    fontWeight: '600'
-                  }}
-                >
-                  Precio
-                </label>
-                <input
-                  name="precio"
-                  type="number"
-                  placeholder="Ej. 1500"
-                  onChange={handleChange}
-                  value={form.precio}
-                  required
-                  style={{
-                    width: '100%',
-                    padding: '14px 16px',
-                    borderRadius: '14px',
-                    border: '1px solid rgba(255,255,255,0.18)',
-                    outline: 'none',
-                    fontSize: '15px',
-                    background: 'rgba(255,255,255,0.95)',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              </div>
-
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  padding: '15px',
-                  background: 'linear-gradient(90deg, #2563eb, #38bdf8)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '14px',
-                  fontSize: '16px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  boxShadow: '0 10px 22px rgba(37,99,235,0.35)',
-                  transition: '0.3s ease'
-                }}
-              >
-                Guardar servicio
-              </button>
-            </form>
-
-            {error && (
-              <div
-                style={{
-                  marginTop: '20px',
-                  background: 'rgba(239,68,68,0.15)',
-                  border: '1px solid rgba(248,113,113,0.35)',
-                  color: '#fee2e2',
-                  padding: '14px',
-                  borderRadius: '14px',
-                  fontWeight: '600'
-                }}
-              >
-                {error}
-              </div>
-            )}
+          <div className="content-header">
+            <h2 className="section-title">Servicios Disponibles</h2>
+            <div className="stats-badge">{filteredServices.length} Servicios encontrados</div>
           </div>
 
-          <div
-            style={{
-              background: 'rgba(255,255,255,0.14)',
-              backdropFilter: 'blur(14px)',
-              WebkitBackdropFilter: 'blur(14px)',
-              border: '1px solid rgba(255,255,255,0.18)',
-              borderRadius: '24px',
-              padding: '30px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.25)'
-            }}
-          >
-            <h2
-              style={{
-                color: 'white',
-                marginTop: 0,
-                marginBottom: '10px',
-                fontSize: '28px'
-              }}
-            >
-              Buscar servicios
-            </h2>
+          {showForm && (
+            <div style={{
+              background: 'white', padding: '24px', borderRadius: '16px', 
+              marginBottom: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, color: '#1e293b', fontSize: '18px' }}>Registrar Nuevo Servicio</h3>
+                <button onClick={() => setShowForm(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '16px', alignItems: 'end' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569' }}>Nombre</label>
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} required placeholder="Ej. Formateo PC" style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569' }}>Descripción</label>
+                  <input type="text" name="description" value={formData.description} onChange={handleInputChange} required placeholder="Limpieza de virus..." style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <label style={{ fontSize: '13px', fontWeight: '600', color: '#475569' }}>Precio (S/)</label>
+                  <input type="number" name="price" value={formData.price} onChange={handleInputChange} required placeholder="Ej. 50" style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none' }} />
+                </div>
+                <button type="submit" style={{ height: '42px', padding: '0 20px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '600' }}>
+                  <Save size={18} /> Guardar
+                </button>
+              </form>
+            </div>
+          )}
 
-            <p
-              style={{
-                color: '#dbeafe',
-                marginTop: 0,
-                marginBottom: '20px',
-                lineHeight: '1.6'
-              }}
-            >
-              Filtra rápidamente los servicios disponibles escribiendo una palabra clave.
-            </p>
-
-            <input
-              type="text"
-              placeholder="Buscar servicio..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '14px 16px',
-                borderRadius: '14px',
-                border: '1px solid rgba(255,255,255,0.18)',
-                outline: 'none',
-                fontSize: '15px',
-                background: 'rgba(255,255,255,0.95)',
-                boxSizing: 'border-box'
-              }}
-            />
-
-            <div
-              style={{
-                marginTop: '22px',
-                display: 'grid',
-                gridTemplateColumns: '1fr',
-                gap: '16px',
-                maxHeight: '520px',
-                overflowY: 'auto',
-                paddingRight: '4px'
-              }}
-            >
-              {filtrados.length > 0 ? (
-                filtrados.map((s) => (
-                  <div
-                    key={s.id}
-                    style={{
-                      background: 'rgba(255,255,255,0.96)',
-                      borderRadius: '18px',
-                      padding: '18px',
-                      boxShadow: '0 10px 24px rgba(15,23,42,0.12)',
-                      textAlign: 'left',
-                      borderLeft: '6px solid #2563eb'
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'start',
-                        gap: '12px',
-                        marginBottom: '10px'
-                      }}
-                    >
-                      <h3
-                        style={{
-                          margin: 0,
-                          color: '#1e3a8a',
-                          fontSize: '20px'
-                        }}
-                      >
-                        {s.nombre}
-                      </h3>
-
-                      <span
-                        style={{
-                          background: '#dbeafe',
-                          color: '#1d4ed8',
-                          padding: '6px 12px',
-                          borderRadius: '999px',
-                          fontSize: '13px',
-                          fontWeight: '700',
-                          whiteSpace: 'nowrap'
-                        }}
-                      >
-                        S/ {s.precio}
-                      </span>
-                    </div>
-
-                    <p
-                      style={{
-                        margin: '0 0 16px 0',
-                        color: '#475569',
-                        lineHeight: '1.6'
-                      }}
-                    >
-                      {s.descripcion}
-                    </p>
-
-                    <button
-                      onClick={() => eliminar(s.id)}
-                      style={{
-                        background: 'linear-gradient(90deg, #dc2626, #f97316)',
-                        color: 'white',
-                        border: 'none',
-                        padding: '11px 16px',
-                        borderRadius: '12px',
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        boxShadow: '0 8px 18px rgba(220,38,38,0.25)'
-                      }}
-                    >
-                      Eliminar servicio
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <div
-                  style={{
-                    background: 'rgba(255,255,255,0.96)',
-                    borderRadius: '18px',
-                    padding: '24px',
-                    textAlign: 'center',
-                    color: '#475569',
-                    boxShadow: '0 10px 24px rgba(15,23,42,0.12)'
-                  }}
-                >
-                  No hay servicios disponibles por el momento.
+          {loading ? (
+            <div className="loader">Sincronizando base de datos en Aiven...</div>
+          ) : (
+            <div className="services-grid">
+              {filteredServices.map(service => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  onDelete={deleteService}
+                  onEdit={editService}
+                />
+              ))}
+              {filteredServices.length === 0 && !loading && (
+                <div className="no-data" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', background: 'white', borderRadius: '16px', color: '#64748b' }}>
+                  No se encontraron servicios en la base de datos. ¡Registra uno nuevo!
                 </div>
               )}
             </div>
-          </div>
+          )}
         </div>
-
-        <div
-          style={{
-            marginTop: '30px',
-            background: 'rgba(255,255,255,0.12)',
-            border: '1px solid rgba(255,255,255,0.16)',
-            borderRadius: '22px',
-            padding: '20px',
-            color: '#e0f2fe',
-            textAlign: 'center',
-            boxShadow: '0 14px 28px rgba(0,0,0,0.18)'
-          }}
-        >
-          <strong style={{ fontSize: '18px' }}>Servicios sugeridos:</strong>
-          <p style={{ marginBottom: 0, marginTop: '10px', lineHeight: '1.8' }}>
-            Desarrollo Web, Soporte Técnico, Diseño UI/UX, Ciberseguridad,
-            Mantenimiento de Equipos, Hosting Web y Consultoría Tecnológica.
-          </p>
-        </div>
-      </div>
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
