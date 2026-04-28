@@ -1,29 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Wrench, LayoutDashboard, Search } from 'lucide-react';
+import { Wrench, LayoutDashboard, Search, PlusCircle } from 'lucide-react';
 import ServiceCard from './components/ServiceCard';
 import './App.css';
+
+// Usamos la variable de entorno de Vercel
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState(null);
 
-  useEffect(() => { fetchServices(); }, []);
+  // Cargar servicios al iniciar
+  useEffect(() => { 
+    fetchServices(); 
+  }, []);
 
   const fetchServices = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/services');
+      setLoading(true);
+      // Petición al backend en Render
+      const res = await axios.get(`${API_URL}/services`);
       setServices(res.data);
-    } catch (err) { console.error("Error backend:", err); } finally { setLoading(false); }
+      setError(null);
+    } catch (err) { 
+      console.error("Error backend:", err);
+      setError("No se pudo sincronizar con el servidor");
+    } finally { 
+      setLoading(false); 
+    }
+  };
+
+  const addService = async () => {
+    const name = window.prompt("Nombre del nuevo servicio:");
+    const description = window.prompt("Descripción:");
+    const price = window.prompt("Precio (S/):");
+
+    if (name && price) {
+      try {
+        await axios.post(`${API_URL}/services`, {
+          name,
+          description,
+          price: parseFloat(price)
+        });
+        fetchServices();
+      } catch (err) {
+        alert("Error al guardar el servicio");
+      }
+    }
   };
 
   const deleteService = async (id) => {
     if (window.confirm("¿Eliminar este servicio permanentemente?")) {
       try {
-        await axios.delete(`http://localhost:3000/api/services/${id}`);
+        await axios.delete(`${API_URL}/services/${id}`);
         fetchServices();
-      } catch (err) { alert("Error al eliminar"); }
+      } catch (err) { 
+        alert("Error al eliminar"); 
+      }
     }
   };
 
@@ -32,13 +68,15 @@ function App() {
     const newPrice = window.prompt("Editar precio:", service.price);
     if (newName && newPrice) {
       try {
-        await axios.put(`http://localhost:3000/api/services/${service.id}`, {
+        await axios.put(`${API_URL}/services/${service.id}`, {
           name: newName,
           price: parseFloat(newPrice),
           description: service.description
         });
         fetchServices();
-      } catch (err) { alert("Error al actualizar"); }
+      } catch (err) { 
+        alert("Error al actualizar"); 
+      }
     }
   };
 
@@ -48,7 +86,6 @@ function App() {
 
   return (
     <div className="dashboard-container">
-      {/* SIDEBAR LIMPIO */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <Wrench size={24} /> <span>TechHub</span>
@@ -57,10 +94,12 @@ function App() {
           <li className="menu-item active">
             <LayoutDashboard size={20}/> <span>Dashboard</span>
           </li>
+          <li className="menu-item" onClick={addService} style={{cursor: 'pointer'}}>
+            <PlusCircle size={20}/> <span>Nuevo Servicio</span>
+          </li>
         </ul>
       </aside>
 
-      {/* CONTENIDO PRINCIPAL */}
       <main className="main-content">
         <header className="top-bar">
           <div className="search-wrapper">
@@ -68,7 +107,7 @@ function App() {
               <Search className="search-icon-inside" size={22} />
               <input 
                 type="text" 
-                placeholder="Busca servicios por nombre (ej. Mantenimiento)..." 
+                placeholder="Busca servicios por nombre..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -77,13 +116,15 @@ function App() {
         </header>
 
         <div className="content-body">
+          {error && <div className="error-banner">{error}</div>}
+          
           <div className="content-header">
             <h2 className="section-title">Servicios Disponibles</h2>
             <div className="stats-badge">{filteredServices.length} Servicios encontrados</div>
           </div>
           
           {loading ? (
-            <div className="loader">Sincronizando base de datos...</div>
+            <div className="loader">Sincronizando base de datos en Aiven...</div>
           ) : (
             <div className="services-grid">
               {filteredServices.map(service => (
@@ -94,6 +135,9 @@ function App() {
                   onEdit={editService} 
                 />
               ))}
+              {filteredServices.length === 0 && !loading && (
+                <div className="no-data">No se encontraron servicios en la nube.</div>
+              )}
             </div>
           )}
         </div>

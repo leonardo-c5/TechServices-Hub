@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const sequelize = require('./config/db');
 
-// Importar Modelos para establecer relaciones
+// Importar Modelos (Asegúrate que las mayúsculas coincidan con tus archivos)
 const Service = require('./models/Service');
 const Categoria = require('./models/Categoria');
 
@@ -12,29 +12,38 @@ const serviceRoutes = require('./routes/serviceRoutes');
 
 const app = express();
 
-// CONFIGURACIÓN DE CORS (Abierta para que Vercel no de error)
-app.use(cors());
+// 1. CONFIGURACIÓN DE CORS REFORZADA (Para que Vercel no bloquee el POST)
+app.use(cors({
+  origin: '*', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
-// CONFIGURACIÓN DE RELACIONES (Punto 1.A del Trabajo)
-// Una Categoría tiene muchos Servicios
+// 2. RELACIONES (Punto 1.A del Proyecto)
 Categoria.hasMany(Service, { foreignKey: 'categoriaId', as: 'servicios' });
 Service.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
 
-// RUTAS 
-// Cambiamos a '/api' para que la URL de Vercel sea más limpia
+// 3. RUTA DE PRUEBA (Para que al entrar a /api no salga "Cannot GET")
+app.get('/api', (req, res) => {
+    res.json({ mensaje: "Backend TechServices funcionando correctamente" });
+});
+
+// 4. RUTAS PRINCIPALES
 app.use('/api', serviceRoutes);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000; // Render prefiere el puerto 10000
 
-// SINCRONIZACIÓN CON LA NUBE (Aiven)
-// 'alter: true' ayuda a que si agregaste columnas nuevas (como categoriaId), 
-// Sequelize intente crearlas sin borrar tus datos.
-sequelize.sync({ force: true }) 
+// 5. SINCRONIZACIÓN Y ARRANQUE
+// 'alter: true' es lo ideal para producción.
+sequelize.sync({ alter: true }) 
     .then(() => {
-        console.log('¡TABLAS CREADAS EN AIVEN!');
-        app.listen(PORT, () => console.log(`Puerto: ${PORT}`));
+        console.log('¡Conexión a Aiven exitosa y tablas actualizadas!');
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Servidor corriendo en puerto: ${PORT}`);
+        });
     })
     .catch(err => {
-        console.error('Error al conectar con la DB en la nube:', err);
+        console.error('Error fatal en la base de datos:', err);
     });
