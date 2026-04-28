@@ -1,26 +1,26 @@
 import React from 'react';
-import { Edit3, Trash2, Tag, DollarSign } from 'lucide-react';
 
 const ServiceCard = ({ service, onDelete, onEdit }) => {
   return (
     <div className="service-card">
       <div className="card-body">
         <div className="card-header">
-          <Tag size={18} className="icon-tag" />
-          <h3>{service.name}</h3>
+          <span className="icon-tag" style={{ fontSize: '18px' }}>🏷️</span>
+          {/* Escudo protector: acepta name en inglés o nombre en español */}
+          <h3>{service.name || service.nombre}</h3>
         </div>
-        <p className="description">{service.description}</p>
+        <p className="description">{service.description || service.descripcion}</p>
         <div className="price-tag">
-          <DollarSign size={16} />
-          S/ {service.price}
+          <span style={{ fontSize: '18px' }}>💰</span>
+          S/ {service.price || service.precio}
         </div>
       </div>
       <div className="card-actions">
         <button className="btn-edit" onClick={() => onEdit(service)}>
-          <Edit3 size={18} /> Editar
+          ✏️ Editar
         </button>
         <button className="btn-delete" onClick={() => onDelete(service.id)}>
-          <Trash2 size={18} /> Eliminar
+          🗑️ Eliminar
         </button>
       </div>
 
@@ -41,13 +41,13 @@ const ServiceCard = ({ service, onDelete, onEdit }) => {
         }
         .card-body { padding: 25px; flex-grow: 1; }
         .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-        .icon-tag { color: #2563eb; opacity: 0.6; }
+        .icon-tag { opacity: 0.8; }
         .card-body h3 { margin: 0; color: #1e293b; font-size: 1.3rem; font-weight: 700; }
         .description { color: #64748b; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5; }
         .price-tag { 
           display: inline-flex;
           align-items: center;
-          gap: 5px;
+          gap: 6px;
           font-weight: bold; 
           color: #2563eb; 
           font-size: 1.25rem; 
