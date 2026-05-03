@@ -70,8 +70,10 @@ function App() {
       setError('')
       alert("¡Servicio guardado correctamente!");
     } catch (err) {
-      console.error(err)
-      setError('Error al guardar. Verifica la conexión.')
+      // AQUÍ ESTÁ LA MAGIA: Capturamos el error real del backend
+      console.error("Respuesta del servidor:", err.response?.data);
+      const mensajeError = err.response?.data?.message || 'Error al guardar. Verifica la conexión.';
+      setError(mensajeError);
     } finally {
       setLoading(false)
     }
@@ -160,7 +162,7 @@ function App() {
                 <input name="precio" type="number" placeholder="Ej. 50" onChange={handleChange} value={form.precio} required style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px' }} />
               </div>
 
-              {/* INPUT DE IMAGEN (NUEVO) */}
+              {/* INPUT DE IMAGEN */}
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', color: '#e0f2fe', marginBottom: '8px', fontWeight: '600' }}>Imagen del servicio</label>
                 <input 
@@ -204,7 +206,7 @@ function App() {
                 filtrados.map((s) => (
                   <div key={s.id} style={{ background: 'rgba(255,255,255,0.96)', borderRadius: '18px', padding: '18px', textAlign: 'left', borderLeft: '6px solid #2563eb' }}>
                     
-                    {/* VISUALIZACIÓN DE IMAGEN (NUEVO) */}
+                    {/* VISUALIZACIÓN DE IMAGEN */}
                     {s.image && (
                       <img 
                         src={`${IMAGE_BASE_URL}${s.image}`} 

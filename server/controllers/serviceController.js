@@ -11,24 +11,37 @@ exports.getAllServices = async (req, res) => {
 
 exports.createService = async (req, res) => {
     try {
-        const { name, description, price } = req.body;
+        // LOGS PARA VER LA VERDAD EN RENDER
+        console.log("Datos recibidos en el body:", req.body);
+        console.log("Archivo recibido en req.file:", req.file);
+
+        const { name, description, price, categoriaId } = req.body;
         
         // Si Multer funciona, req.file tendrá la información de la imagen
-        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+        let imagePath = null;
+        if (req.file && req.file.filename) {
+            imagePath = `/uploads/${req.file.filename}`;
+        }
 
         const newService = await Service.create({ 
             name, 
             description, 
             price,
-            image: imagePath // Guardamos la ruta en la DB
+            categoriaId: categoriaId ? categoriaId : null, // Parche: Si no hay categoría, usa null
+            image: imagePath 
         });
 
         res.status(201).json(newService);
     } catch (error) {
+        // ESTO APARECERÁ EN LA TERMINAL DE RENDER
+        console.error("Error completo en el backend:", error);
+
         if (error.name === 'SequelizeUniqueConstraintError') {
             return res.status(400).json({ message: "El nombre del servicio ya existe" });
         }
-        res.status(500).json({ message: "Error al crear" });
+        
+        // ESTO SE ENVIARÁ AL FRONTEND
+        res.status(500).json({ message: "Error DB: " + error.message });
     }
 };
 
