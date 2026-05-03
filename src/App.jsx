@@ -44,7 +44,6 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      // Traducimos al inglés para que la base de datos lo acepte
       const datosParaEnviar = {
         name: form.nombre,
         description: form.descripcion,
@@ -75,7 +74,6 @@ function App() {
   }
 
   const filtrados = servicios.filter((s) => {
-    // Escudo protector: acepta name en inglés o nombre en español para buscar
     const nombreSeguro = s.name || s.nombre || "";
     return nombreSeguro.toLowerCase().includes(busqueda.toLowerCase())
   })
@@ -91,7 +89,13 @@ function App() {
     >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', color: 'white', marginBottom: '35px' }}>
-          <h1 style={{ fontSize: '56px', margin: '0', fontWeight: '800', textShadow: '0 4px 18px rgba(0,0,0,0.25)' }}>
+          {/* TÍTULO RESPONSIVO */}
+          <h1 style={{ 
+            fontSize: 'clamp(32px, 8vw, 56px)', 
+            margin: '0', 
+            fontWeight: '800', 
+            textShadow: '0 4px 18px rgba(0,0,0,0.25)' 
+          }}>
             TechServices Hub
           </h1>
           <p style={{ marginTop: '14px', fontSize: '18px', color: '#dbeafe', maxWidth: '760px', marginInline: 'auto', lineHeight: '1.7' }}>
@@ -100,14 +104,32 @@ function App() {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '28px', alignItems: 'start' }}>
+        {/* CONTENEDOR FLEXIBLE (CAMBIO CLAVE PARA CELULARES) */}
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '28px', 
+          justifyContent: 'center', 
+          alignItems: 'start' 
+        }}>
+          
           {/* FORMULARIO */}
-          <div style={{ background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '24px', padding: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}>
+          <div style={{ 
+            flex: '1 1 350px', 
+            maxWidth: '600px',
+            background: 'rgba(255,255,255,0.14)', 
+            backdropFilter: 'blur(14px)', 
+            WebkitBackdropFilter: 'blur(14px)', 
+            border: '1px solid rgba(255,255,255,0.18)', 
+            borderRadius: '24px', 
+            padding: '30px', 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)' 
+          }}>
             <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}>
               Registrar servicio
             </h2>
             <p style={{ color: '#dbeafe', marginTop: 0, marginBottom: '25px', lineHeight: '1.6' }}>
-              Agrega un nuevo servicio al catálogo de la empresa con su nombre, descripción y precio referencial.
+              Agrega un nuevo servicio al catálogo de la empresa.
             </p>
 
             <form onSubmit={handleSubmit}>
@@ -127,7 +149,7 @@ function App() {
               </div>
 
               <button type="submit" style={{ width: '100%', padding: '15px', background: 'linear-gradient(90deg, #2563eb, #38bdf8)', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 22px rgba(37,99,235,0.35)' }}>
-                {loading ? "Sincronizando..." : " Guardar servicio"}
+                {loading ? "Sincronizando..." : "Guardar servicio"}
               </button>
             </form>
 
@@ -139,9 +161,18 @@ function App() {
           </div>
 
           {/* LISTA DE SERVICIOS */}
-          <div style={{ background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '24px', padding: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}>
-            <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}> Buscar servicios</h2>
-            <input type="text" placeholder="Formateo, Desarrollo, etc..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px', marginBottom: '22px' }} />
+          <div style={{ 
+            flex: '1 1 350px', 
+            maxWidth: '600px',
+            background: 'rgba(255,255,255,0.14)', 
+            backdropFilter: 'blur(14px)', 
+            border: '1px solid rgba(255,255,255,0.18)', 
+            borderRadius: '24px', 
+            padding: '30px', 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.25)' 
+          }}>
+            <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}>Buscar servicios</h2>
+            <input type="text" placeholder="Filtrar por nombre..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px', marginBottom: '22px' }} />
 
             <div style={{ display: 'grid', gap: '16px', maxHeight: '520px', overflowY: 'auto', paddingRight: '4px' }}>
               {loading ? (
@@ -150,23 +181,21 @@ function App() {
                 filtrados.map((s) => (
                   <div key={s.id} style={{ background: 'rgba(255,255,255,0.96)', borderRadius: '18px', padding: '18px', textAlign: 'left', borderLeft: '6px solid #2563eb' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
-                      {/* Escudo protector: name o nombre */}
                       <h3 style={{ margin: 0, color: '#1e3a8a', fontSize: '20px' }}>{s.name || s.nombre}</h3>
-                      {/* Escudo protector: price o precio */}
                       <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '6px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>S/ {s.price || s.precio}</span>
                     </div>
-                    {/* Escudo protector: description o descripcion */}
                     <p style={{ margin: '0 0 16px 0', color: '#475569' }}>{s.description || s.descripcion}</p>
-                    <button onClick={() => eliminar(s.id)} style={{ background: '#dc2626', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}> Eliminar</button>
+                    <button onClick={() => eliminar(s.id)} style={{ background: '#dc2626', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>Eliminar</button>
                   </div>
                 ))
               ) : (
                 <div style={{ background: 'rgba(255,255,255,0.96)', borderRadius: '18px', padding: '24px', textAlign: 'center', color: '#475569' }}>
-                  No se encontraron servicios registrados. ¡Agrega uno nuevo!
+                  No se encontraron servicios registrados.
                 </div>
               )}
             </div>
           </div>
+
         </div>
       </div>
     </div>
