@@ -12,7 +12,17 @@ exports.getAllServices = async (req, res) => {
 exports.createService = async (req, res) => {
     try {
         const { name, description, price } = req.body;
-        const newService = await Service.create({ name, description, price });
+        
+        // Si Multer funciona, req.file tendrá la información de la imagen
+        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+        const newService = await Service.create({ 
+            name, 
+            description, 
+            price,
+            image: imagePath // Guardamos la ruta en la DB
+        });
+
         res.status(201).json(newService);
     } catch (error) {
         if (error.name === 'SequelizeUniqueConstraintError') {

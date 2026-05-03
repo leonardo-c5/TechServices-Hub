@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
-// FORZAMOS LA URL DIRECTA PARA QUE VERCEL NO SE CONFUNDA NUNCA MÁS
+// URL de Render (Backend)
 const API_URL = "https://techservices-hub-aopg.onrender.com/api";
+// URL Base para mostrar las imágenes
+const IMAGE_BASE_URL = "https://techservices-hub-aopg.onrender.com";
 
 function App() {
   const [servicios, setServicios] = useState([])
   const [busqueda, setBusqueda] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [archivo, setArchivo] = useState(null) // Nuevo estado para la imagen
   const [form, setForm] = useState({
     nombre: '',
     descripcion: '',
@@ -44,21 +47,33 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const datosParaEnviar = {
-        name: form.nombre,
-        description: form.descripcion,
-        price: form.precio
+      setLoading(true)
+      
+      // Uso de FormData para enviar archivos multimedia (Requisito Fase Pro)
+      const formData = new FormData();
+      formData.append('name', form.nombre);
+      formData.append('description', form.descripcion);
+      formData.append('price', form.precio);
+      if (archivo) {
+        formData.append('image', archivo);
       }
       
-      await axios.post(`${API_URL}/services`, datosParaEnviar)
+      await axios.post(`${API_URL}/services`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
       
       setForm({ nombre: '', descripcion: '', precio: '' })
+      setArchivo(null) // Limpiar archivo seleccionado
       cargarServicios()
       setError('')
       alert("¡Servicio guardado correctamente!");
     } catch (err) {
       console.error(err)
       setError('Error al guardar. Verifica la conexión.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -89,7 +104,6 @@ function App() {
     >
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', color: 'white', marginBottom: '35px' }}>
-          {/* TÍTULO RESPONSIVO */}
           <h1 style={{ 
             fontSize: 'clamp(32px, 8vw, 56px)', 
             margin: '0', 
@@ -104,7 +118,6 @@ function App() {
           </p>
         </div>
 
-        {/* CONTENEDOR FLEXIBLE (CAMBIO CLAVE PARA CELULARES) */}
         <div style={{ 
           display: 'flex', 
           flexWrap: 'wrap', 
@@ -119,7 +132,6 @@ function App() {
             maxWidth: '600px',
             background: 'rgba(255,255,255,0.14)', 
             backdropFilter: 'blur(14px)', 
-            WebkitBackdropFilter: 'blur(14px)', 
             border: '1px solid rgba(255,255,255,0.18)', 
             borderRadius: '24px', 
             padding: '30px', 
@@ -129,7 +141,7 @@ function App() {
               Registrar servicio
             </h2>
             <p style={{ color: '#dbeafe', marginTop: 0, marginBottom: '25px', lineHeight: '1.6' }}>
-              Agrega un nuevo servicio al catálogo de la empresa.
+              Agrega un nuevo servicio al catálogo con su imagen y datos.
             </p>
 
             <form onSubmit={handleSubmit}>
@@ -143,9 +155,20 @@ function App() {
                 <input name="descripcion" placeholder="Limpieza de virus..." onChange={handleChange} value={form.descripcion} required style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px' }} />
               </div>
 
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '18px' }}>
                 <label style={{ display: 'block', color: '#e0f2fe', marginBottom: '8px', fontWeight: '600' }}>Precio (S/)</label>
                 <input name="precio" type="number" placeholder="Ej. 50" onChange={handleChange} value={form.precio} required style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px' }} />
+              </div>
+
+              {/* INPUT DE IMAGEN (NUEVO) */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', color: '#e0f2fe', marginBottom: '8px', fontWeight: '600' }}>Imagen del servicio</label>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => setArchivo(e.target.files[0])} 
+                  style={{ color: 'white', fontSize: '14px' }} 
+                />
               </div>
 
               <button type="submit" style={{ width: '100%', padding: '15px', background: 'linear-gradient(90deg, #2563eb, #38bdf8)', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 22px rgba(37,99,235,0.35)' }}>
@@ -180,6 +203,17 @@ function App() {
               ) : filtrados.length > 0 ? (
                 filtrados.map((s) => (
                   <div key={s.id} style={{ background: 'rgba(255,255,255,0.96)', borderRadius: '18px', padding: '18px', textAlign: 'left', borderLeft: '6px solid #2563eb' }}>
+                    
+                    {/* VISUALIZACIÓN DE IMAGEN (NUEVO) */}
+                    {s.image && (
+                      <img 
+                        src={`${IMAGE_BASE_URL}${s.image}`} 
+                        alt={s.name || s.nombre} 
+                        style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '12px', marginBottom: '12px' }} 
+                        onError={(e) => e.target.style.display = 'none'}
+                      />
+                    )}
+
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
                       <h3 style={{ margin: 0, color: '#1e3a8a', fontSize: '20px' }}>{s.name || s.nombre}</h3>
                       <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '6px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>S/ {s.price || s.precio}</span>
