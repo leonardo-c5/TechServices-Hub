@@ -31,7 +31,7 @@ app.get('/api', (req, res) => {
 });
 
 // 4. RUTAS PRINCIPALES
-app.use('/api', serviceRoutes);
+app.use('/api/services', serviceRoutes);
 
 const PORT = process.env.PORT || 10000; // Render prefiere el puerto 10000
 
