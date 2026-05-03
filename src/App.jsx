@@ -104,7 +104,7 @@ function App() {
           {/* FORMULARIO */}
           <div style={{ background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '24px', padding: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}>
             <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}>
-              ➕ Registrar servicio
+              Registrar servicio
             </h2>
             <p style={{ color: '#dbeafe', marginTop: 0, marginBottom: '25px', lineHeight: '1.6' }}>
               Agrega un nuevo servicio al catálogo de la empresa con su nombre, descripción y precio referencial.
@@ -127,7 +127,7 @@ function App() {
               </div>
 
               <button type="submit" style={{ width: '100%', padding: '15px', background: 'linear-gradient(90deg, #2563eb, #38bdf8)', color: 'white', border: 'none', borderRadius: '14px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', boxShadow: '0 10px 22px rgba(37,99,235,0.35)' }}>
-                {loading ? "Sincronizando..." : "💾 Guardar servicio"}
+                {loading ? "Sincronizando..." : " Guardar servicio"}
               </button>
             </form>
 
@@ -140,7 +140,7 @@ function App() {
 
           {/* LISTA DE SERVICIOS */}
           <div style={{ background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(14px)', border: '1px solid rgba(255,255,255,0.18)', borderRadius: '24px', padding: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.25)' }}>
-            <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}>🔍 Buscar servicios</h2>
+            <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}> Buscar servicios</h2>
             <input type="text" placeholder="Formateo, Desarrollo, etc..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px', marginBottom: '22px' }} />
 
             <div style={{ display: 'grid', gap: '16px', maxHeight: '520px', overflowY: 'auto', paddingRight: '4px' }}>
@@ -157,7 +157,7 @@ function App() {
                     </div>
                     {/* Escudo protector: description o descripcion */}
                     <p style={{ margin: '0 0 16px 0', color: '#475569' }}>{s.description || s.descripcion}</p>
-                    <button onClick={() => eliminar(s.id)} style={{ background: '#dc2626', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>🗑️ Eliminar</button>
+                    <button onClick={() => eliminar(s.id)} style={{ background: '#dc2626', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}> Eliminar</button>
                   </div>
                 ))
               ) : (
