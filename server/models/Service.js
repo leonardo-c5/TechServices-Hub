@@ -33,8 +33,4 @@ const Service = sequelize.define('Service', {
     paranoid: true // Requerimiento: Soft Delete
 });
 
-// DEFINIR RELACIONES AQUÍ ANTES DEL MODULE.EXPORTS
-Categoria.hasMany(Service, { foreignKey: 'categoriaId', as: 'servicios' });
-Service.belongsTo(Categoria, { foreignKey: 'categoriaId', as: 'categoria' });
-
 module.exports = Service;
