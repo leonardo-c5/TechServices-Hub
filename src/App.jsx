@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import './App.css'
 
-// URL DIRECTA: Si Vercel falla al leer la variable de entorno, usa directamente tu Render
-// (Asegúrate de que esta sea tu URL real de Render)
-const URL_BACKEND_RND = "https://techservices-hub-aopg.onrender.com/api"; 
-const API_URL = import.meta.env.VITE_API_URL || URL_BACKEND_RND;
+// FORZAMOS LA URL DIRECTA PARA QUE VERCEL NO SE CONFUNDA NUNCA MÁS
+const API_URL = "https://techservices-hub-aopg.onrender.com/api";
 
 function App() {
   const [servicios, setServicios] = useState([])
