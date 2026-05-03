@@ -21,6 +21,11 @@ const Service = sequelize.define('Service', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
     },
+    // NUEVO CAMPO PARA LA IMAGEN (Fase Pro)
+    image: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     categoriaId: {
         type: DataTypes.INTEGER,
         references: {
