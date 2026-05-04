@@ -12,11 +12,11 @@ const serviceRoutes = require('./routes/serviceRoutes');
 
 const app = express();
 
-// 1. CONFIGURACIÓN DE CORS REFORZADA (Para que Vercel no bloquee el POST)
+// 1. CONFIGURACIÓN DE CORS REFORZADA
 app.use(cors({
-  origin: '*', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -33,17 +33,17 @@ app.get('/api', (req, res) => {
 // 4. RUTAS PRINCIPALES
 app.use('/api/services', serviceRoutes);
 
-// NUEVA RUTA: Categorías con autogeneración (Seed)
+// NUEVA RUTA: Categorías con autogeneración (PARCHE APLICADO)
 app.get('/api/categorias', async (req, res) => {
     try {
         const count = await Categoria.count();
         if (count === 0) {
-            // Si la tabla está vacía, creamos estas por defecto en Aiven
+            // Se cambió "name" por "nombre" y "description" por "descripcion" para evitar errores en Aiven
             await Categoria.bulkCreate([
-                { name: 'Soporte Técnico', description: 'Mantenimiento y reparación' },
-                { name: 'Desarrollo Web', description: 'Creación de sitios y apps' },
-                { name: 'Ciberseguridad', description: 'Protección de datos y redes' },
-                { name: 'Diseño UI/UX', description: 'Diseño de interfaces' }
+                { nombre: 'Soporte Técnico', descripcion: 'Mantenimiento y reparación' },
+                { nombre: 'Desarrollo Web', descripcion: 'Creación de sitios y apps' },
+                { nombre: 'Ciberseguridad', descripcion: 'Protección de datos y redes' },
+                { nombre: 'Diseño UI/UX', descripcion: 'Diseño de interfaces' }
             ]);
         }
         const categorias = await Categoria.findAll();
