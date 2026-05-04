@@ -1,10 +1,15 @@
 const Service = require('../models/Service');
+const Categoria = require('../models/Categoria'); // NUEVO: Importar modelo Categoria
 
 exports.getAllServices = async (req, res) => {
     try {
-        const services = await Service.findAll();
+        // ACTUALIZADO: Incluir los datos de la categoría relacionada
+        const services = await Service.findAll({
+            include: [{ model: Categoria, as: 'categoria' }]
+        });
         res.json(services);
     } catch (error) {
+        console.error("Error al listar servicios:", error);
         res.status(500).json({ message: "Error al obtener servicios" });
     }
 };

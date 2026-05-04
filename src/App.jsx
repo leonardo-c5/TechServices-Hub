@@ -9,21 +9,29 @@ const IMAGE_BASE_URL = "https://techservices-hub-aopg.onrender.com";
 
 function App() {
   const [servicios, setServicios] = useState([])
+  const [categorias, setCategorias] = useState([]) // NUEVO: Estado para categorías
   const [busqueda, setBusqueda] = useState('')
+  const [filtroCategoria, setFiltroCategoria] = useState('') // NUEVO: Estado para el filtro
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [archivo, setArchivo] = useState(null) // Nuevo estado para la imagen
+  const [archivo, setArchivo] = useState(null)
   const [form, setForm] = useState({
     nombre: '',
     descripcion: '',
-    precio: ''
+    precio: '',
+    categoriaId: '' // NUEVO: Categoría en el formulario
   })
 
-  const cargarServicios = async () => {
+  // ACTUALIZADO: Ahora carga servicios y categorías al mismo tiempo
+  const cargarDatos = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`${API_URL}/services`)
-      setServicios(res.data)
+      const [resServicios, resCategorias] = await Promise.all([
+        axios.get(`${API_URL}/services`),
+        axios.get(`${API_URL}/categorias`)
+      ]);
+      setServicios(resServicios.data)
+      setCategorias(resCategorias.data)
       setError('')
     } catch (err) {
       console.error(err);
@@ -34,7 +42,7 @@ function App() {
   }
 
   useEffect(() => {
-    cargarServicios()
+    cargarDatos()
   }, [])
 
   const handleChange = (e) => {
@@ -49,11 +57,16 @@ function App() {
     try {
       setLoading(true)
       
-      // Uso de FormData para enviar archivos multimedia (Requisito Fase Pro)
       const formData = new FormData();
       formData.append('name', form.nombre);
       formData.append('description', form.descripcion);
       formData.append('price', form.precio);
+      
+      // NUEVO: Agregamos la categoría si fue seleccionada
+      if (form.categoriaId) {
+        formData.append('categoriaId', form.categoriaId);
+      }
+      
       if (archivo) {
         formData.append('image', archivo);
       }
@@ -64,13 +77,13 @@ function App() {
         }
       })
       
-      setForm({ nombre: '', descripcion: '', precio: '' })
-      setArchivo(null) // Limpiar archivo seleccionado
-      cargarServicios()
+      // ACTUALIZADO: Limpiamos también la categoría
+      setForm({ nombre: '', descripcion: '', precio: '', categoriaId: '' })
+      setArchivo(null) 
+      cargarDatos() // ACTUALIZADO: Llama a cargarDatos en vez de cargarServicios
       setError('')
       alert("¡Servicio guardado correctamente!");
     } catch (err) {
-      // AQUÍ ESTÁ LA MAGIA: Capturamos el error real del backend
       console.error("Respuesta del servidor:", err.response?.data);
       const mensajeError = err.response?.data?.message || 'Error al guardar. Verifica la conexión.';
       setError(mensajeError);
@@ -83,16 +96,19 @@ function App() {
     if(window.confirm("¿Seguro que deseas eliminar este servicio permanentemente?")) {
       try {
         await axios.delete(`${API_URL}/services/${id}`)
-        cargarServicios()
+        cargarDatos() // ACTUALIZADO
       } catch (err) {
         setError('No se pudo eliminar el servicio')
       }
     }
   }
 
+  // ACTUALIZADO: Lógica de filtrado combinado (Nombre + Categoría)
   const filtrados = servicios.filter((s) => {
     const nombreSeguro = s.name || s.nombre || "";
-    return nombreSeguro.toLowerCase().includes(busqueda.toLowerCase())
+    const coincideNombre = nombreSeguro.toLowerCase().includes(busqueda.toLowerCase());
+    const coincideCategoria = filtroCategoria ? String(s.categoriaId) === String(filtroCategoria) : true;
+    return coincideNombre && coincideCategoria;
   })
 
   return (
@@ -162,6 +178,17 @@ function App() {
                 <input name="precio" type="number" placeholder="Ej. 50" onChange={handleChange} value={form.precio} required style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px' }} />
               </div>
 
+              {/* NUEVO: SELECTOR DE CATEGORÍA */}
+              <div style={{ marginBottom: '18px' }}>
+                <label style={{ display: 'block', color: '#e0f2fe', marginBottom: '8px', fontWeight: '600' }}>Categoría</label>
+                <select name="categoriaId" value={form.categoriaId} onChange={handleChange} style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px', backgroundColor: 'white' }}>
+                  <option value="">-- Selecciona una categoría --</option>
+                  {categorias.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name || cat.nombre}</option>
+                  ))}
+                </select>
+              </div>
+
               {/* INPUT DE IMAGEN */}
               <div style={{ marginBottom: '24px' }}>
                 <label style={{ display: 'block', color: '#e0f2fe', marginBottom: '8px', fontWeight: '600' }}>Imagen del servicio</label>
@@ -197,15 +224,33 @@ function App() {
             boxShadow: '0 20px 40px rgba(0,0,0,0.25)' 
           }}>
             <h2 style={{ color: 'white', marginTop: 0, marginBottom: '10px', fontSize: '28px' }}>Buscar servicios</h2>
-            <input type="text" placeholder="Filtrar por nombre..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px', marginBottom: '22px' }} />
+            
+            {/* NUEVO: CONTROLES DE FILTRADO COMBINADOS */}
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '22px' }}>
+              <input type="text" placeholder="Filtrar por nombre..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ flex: 2, padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px' }} />
+              <select value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)} style={{ flex: 1, padding: '14px 16px', borderRadius: '14px', border: 'none', outline: 'none', fontSize: '15px', backgroundColor: 'white' }}>
+                <option value="">Todas</option>
+                {categorias.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name || cat.nombre}</option>
+                ))}
+              </select>
+            </div>
 
             <div style={{ display: 'grid', gap: '16px', maxHeight: '520px', overflowY: 'auto', paddingRight: '4px' }}>
               {loading ? (
                  <div style={{ color: 'white', textAlign: 'center' }}>Sincronizando base de datos...</div>
               ) : filtrados.length > 0 ? (
                 filtrados.map((s) => (
-                  <div key={s.id} style={{ background: 'rgba(255,255,255,0.96)', borderRadius: '18px', padding: '18px', textAlign: 'left', borderLeft: '6px solid #2563eb' }}>
+                  // ACTUALIZADO: position: 'relative' para la etiqueta de categoría
+                  <div key={s.id} style={{ background: 'rgba(255,255,255,0.96)', borderRadius: '18px', padding: '18px', textAlign: 'left', borderLeft: '6px solid #2563eb', position: 'relative' }}>
                     
+                    {/* NUEVO: ETIQUETA VISUAL DE CATEGORÍA */}
+                    {s.categoria && (
+                      <span style={{ position: 'absolute', top: '10px', right: '10px', background: '#3b82f6', color: 'white', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 'bold', zIndex: 1, boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}>
+                        {s.categoria.name || s.categoria.nombre}
+                      </span>
+                    )}
+
                     {/* VISUALIZACIÓN DE IMAGEN */}
                     {s.image && (
                       <img 
@@ -217,7 +262,8 @@ function App() {
                     )}
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '10px' }}>
-                      <h3 style={{ margin: 0, color: '#1e3a8a', fontSize: '20px' }}>{s.name || s.nombre}</h3>
+                      {/* Le di un poco de padding derecho al título para que no choque con la etiqueta */}
+                      <h3 style={{ margin: 0, color: '#1e3a8a', fontSize: '20px', paddingRight: '80px' }}>{s.name || s.nombre}</h3>
                       <span style={{ background: '#dbeafe', color: '#1d4ed8', padding: '6px 12px', borderRadius: '999px', fontSize: '13px', fontWeight: '700' }}>S/ {s.price || s.precio}</span>
                     </div>
                     <p style={{ margin: '0 0 16px 0', color: '#475569' }}>{s.description || s.descripcion}</p>
